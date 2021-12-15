@@ -79,12 +79,14 @@ num_time_slots = 5*12
 
 model = cp_model.CpModel()
 
+# x[i,j,k] = 1 if class k has a lecture at the time slot i in the room j else 0
 x = {}
 for i in range(num_time_slots):
     for j in range(M):
         for k in range(N):
             x[i,j,k] = model.NewBoolVar(f'x[{i},{j},{k}]')
 
+# y[i,k] = 1 if class k has a lecture at the time slot i else 0            
 y = {}
 for i in range(num_time_slots):
     for k in range(N):
