@@ -1,5 +1,4 @@
 from ortools.sat.python import cp_model
-from mini_project_instance_generator import gen
 
 def Time(i):
     if 1<= i <= 12:
@@ -75,7 +74,6 @@ def input(filename):
     return N,M,t,g,s,c
 
 
-gen('data_15.txt',15,2)
 N,M,t,g,s,c = input('data_project_15.txt')
 num_time_slots = 5*12
 
