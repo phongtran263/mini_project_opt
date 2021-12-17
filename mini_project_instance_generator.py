@@ -16,6 +16,6 @@ def gen(filename,N,M):
     c = max(l) + rd.randint(1,10)
     f.write(f'{c}')
     
-gen('data_15.txt',15,2)	
+
     
     
