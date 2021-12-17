@@ -157,7 +157,7 @@ def random_restart(problem, limit = 100):
         state,iterations = hill_climbing(problem)
         num_iterations += iterations
         cnt += 1
-    if problem.goal_test(state) == True:
+    if problem.goal_test(state):
         status = 'Feasible'
     else:
         status = 'Solution not found'
