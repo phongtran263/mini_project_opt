@@ -111,7 +111,7 @@ class TimetableSchedule():
         return violations
     
     def children(self,state):
-        # return some neighborhoods of a state
+        # return some neighbors of a state
         children = []
         candidate = self.candidate.copy()
         for i in state.values():
