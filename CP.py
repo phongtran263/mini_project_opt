@@ -26,12 +26,16 @@ from ortools.sat.python import cp_model
 
 class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
 	#print intermediate solution
-	def __init__(self,vars, N, M):
+	def __init__(self,vars, N, M, c, s, g, limit):
 		cp_model.CpSolverSolutionCallback.__init__(self) 
 		self.__vars = vars 
 		self.__solution_count = 0
 		self.__N = N
 		self.__M = M
+		self.__c = c
+		self.__s = s
+		self.__g = g
+		self.__limit = limit
 	def on_solution_callback(self):
 		self.__solution_count += 1
 		print(f'\nSolution {self.__solution_count}:')
@@ -40,7 +44,9 @@ class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
 				for j in range(12):
 					for m in range(self.__M):
 						if self.Value(self.__vars[n][i][j][m]):
-							print(f'\tClass {n} has lesson in shift {j} of day {i} at room {m} having {c[m]} slots, has {s[n]} students and is taught by teacher {g[n]}')
+							print(f'\tClass {n} has lesson in shift {j} of day {i} at room {m} having {self.__c[m]} slots, has {self.__s[n]} students and is taught by teacher {self.__g[n]}')
+		if self.__solution_count == self.__limit:
+			self.StopSearch()
 	def solution_count(self):
 		return self.__solution_count
 
@@ -58,39 +64,45 @@ def input(filename):
 		c = [int(x) for x in f.readline().split()]
 		return N, M, t, g, s, c
 
-N, M, t, g, s, c = input('/Users/phong/Documents/Optimization/Code/mini project/data.txt')#Copy yours file's path here
-maxc = max(c)
-G0 = set(g)
-G = {}
-for i in G0:
-	G[i] = [j for j in range(N) if g[j] == i]
+def CP(f):
+	# Notations and data
+	N, M, t, g, s, c = input(f)
+	G0 = set(g)
+	G = {}
+	for i in G0:
+		G[i] = [j for j in range(N) if g[j] == i]
 
-model = cp_model.CpModel()
-Time_Table = [[[[model.NewIntVar(0, 1, f'S[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
+	# Create a model and set variables
+	model = cp_model.CpModel()
+	Time_Table = [[[[model.NewIntVar(0, 1, f'S[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
 
-for p in G:
-	for i in range(5):
-		for j in range(12):
-			for m in range(M):
-				linexpr = cp_model.LinearExpr()
-				cstr = model.AddLinearConstraint(linexpr.Sum(Time_Table[k][i][j][m] for k in G[p]), 0, 1)
+	# Constraints
+	for p in G:
+		for i in range(5):
+			for j in range(12):
+				for m in range(M):
+					model.AddLinearConstraint(sum(Time_Table[k][i][j][m] for k in G[p]), 0, 1)
 
-for n in range(N):
-	for i in range(5):
-		for j in range(12):
-			for m in range(M):
-				b = model.NewBoolVar('b')
-				model.Add(Time_Table[n][i][j][m] == 1).OnlyEnforceIf(b)
-				model.Add(Time_Table[n][i][j][m] == 0).OnlyEnforceIf(b.Not())
-				model.Add(c[m] >= s[n]).OnlyEnforceIf(b)
+	for n in range(N):
+		for i in range(5):
+			for j in range(12):
+				for m in range(M):
+					b = model.NewBoolVar('b')
+					model.Add(Time_Table[n][i][j][m] == 1).OnlyEnforceIf(b)
+					model.Add(Time_Table[n][i][j][m] == 0).OnlyEnforceIf(b.Not())
+					model.Add(c[m] >= s[n]).OnlyEnforceIf(b)
 
-for n in range(N):
-	model.Add(sum(Time_Table[n][i][j][m] for m in range(M) for j in range(12) for i in range(5)) == t[n])
+	for n in range(N):
+		model.Add(sum(Time_Table[n][i][j][m] for m in range(M) for j in range(12) for i in range(5)) == t[n])
 
+	# Solve
+	solver = cp_model.CpSolver()
+	solver.parameters.search_branching == cp_model.FIXED_SEARCH
 
-solver = cp_model.CpSolver()
-solver.parameters.search_branching == cp_model.FIXED_SEARCH
+	solution_printer = VarArraySolutionPrinter(Time_Table, N, M,c, s, g, 50)
+	solver.SearchForAllSolutions(model, solution_printer)
+	solver.Solve(model, solution_printer)
+	print(f'Wall time: {solver.WallTime()}')
 
-solution_printer = VarArraySolutionPrinter(Time_Table, N, M)
-solver.SearchForAllSolutions(model, solution_printer)
-solver.Solve(model, solution_printer)
+if __name__ == '__main__':
+	CP('data_15.txt')
