@@ -42,72 +42,79 @@ def input(filename):
 		c = [int(x) for x in f.readline().split()]
 		return N, M, t, g, s, c
 
-N, M, t, g, s, c = input('/Users/phong/Documents/Optimization/Code/mini_project_opt/data.txt')#Copy yours file's path here
-maxc = max(c)
-G0 = set(g)
-G = {}
-for i in G0:
-	G[i] = [j for j in range(N) if g[j] == i]
-ubDevi = max(t)
+def MIP(filename):
+	# Notations & data
+	N, M, t, g, s, c = input(filename)
+	G0 = set(g)
+	G = {}
+	for i in G0:
+		G[i] = [j for j in range(N) if g[j] == i]
+	ubDevi = max(t)
 
-solver = pywraplp.Solver.CreateSolver('CBC')
-inf = solver.infinity()
-Time_Table = [[[[solver.IntVar(0, 1, f'Time_Table[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
-Most_Shifts_Day = [solver.IntVar(0, ubDevi, f'Most_Shifts_Day[{n}]') for n in range(N)]
-Least_Shifts_Day = [solver.IntVar(0, ubDevi, f'Least_Shifts_Day[{n}]') for n in range(N)]
+	solver = pywraplp.Solver.CreateSolver('CBC')
+	inf = solver.infinity()
+	Time_Table = [[[[solver.IntVar(0, 1, f'Time_Table[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
+	Most_Shifts_Day = [solver.IntVar(0, ubDevi, f'Most_Shifts_Day[{n}]') for n in range(N)]
+	Least_Shifts_Day = [solver.IntVar(0, ubDevi, f'Least_Shifts_Day[{n}]') for n in range(N)]
 
-for p in G:
-	for i in range(5):
-		for j in range(12):
-			for m in range(M):
-				cstr = solver.Constraint(0, 1)
-				for n in G[p]:
+	# Constraints
+	for p in G:
+		for i in range(5):
+			for j in range(12):
+				for m in range(M):
+					cstr = solver.Constraint(0, 1)
+					for n in G[p]:
+						cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
+
+	for n in range(N):
+		for m in range(M):
+			if s[n] > c[m]:
+				for i in range(5):
+					for j in range(12):
+						cstr = solver.Constraint(0, 0)
+						cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
+					
+	for n in range(N):
+		cstr = solver.Constraint(t[n], t[n])
+		for i in range(5):
+			for j in range(12):
+				for m in range(M):
 					cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
 
-for n in range(N):
-	for m in range(M):
-		if s[n] > c[m]:
-			for i in range(5):
-				for j in range(12):
-					cstr = solver.Constraint(0, 0)
-					cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
-				
-for n in range(N):
-	cstr = solver.Constraint(t[n], t[n])
-	for i in range(5):
-		for j in range(12):
-			for m in range(M):
-				cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
+	for n in range(N):
+		for i in range(5):
+			cstr = solver.Constraint(0, inf)
+			cstr.SetCoefficient(Most_Shifts_Day[n], 1)
+			for j in range(12):
+				for m in range(M):
+					cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
 
-for n in range(N):
-	for i in range(5):
-		cstr = solver.Constraint(0, inf)
-		cstr.SetCoefficient(Most_Shifts_Day[n], 1)
-		for j in range(12):
-			for m in range(M):
-				cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
+	for n in range(N):
+		for i in range(5):
+			cstr = solver.Constraint(-inf, 0)
+			cstr.SetCoefficient(Least_Shifts_Day[n], 1)
+			for j in range(12):
+				for m in range(M):
+					cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
 
-for n in range(N):
-	for i in range(5):
-		cstr = solver.Constraint(-inf, 0)
-		cstr.SetCoefficient(Least_Shifts_Day[n], 1)
-		for j in range(12):
-			for m in range(M):
-				cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
+	# Objective function and solving
+	obj = solver.Objective()
+	for n in range(N):
+		obj.SetCoefficient(Most_Shifts_Day[n], 1)
+		obj.SetCoefficient(Least_Shifts_Day[n], -1)
 
-obj = solver.Objective()
-for n in range(N):
-	obj.SetCoefficient(Most_Shifts_Day[n], 1)
-	obj.SetCoefficient(Least_Shifts_Day[n], -1)
+	obj.SetMinimization()
+	solver.Solve()
+	print(obj.Value())
+	solu = [[[[Time_Table[n][i][j][m].solution_value() for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
+	for n in range(N):
+		for i in range(5):
+			for j in range(12):
+				for m in range(M):
+					if solu[n][i][j][m]:
+						print(f'\tClass {n + 1} has lesson in shift {j + 1} of day {i + 1} at room {m + 1} having {c[m]} slots, has {s[n]} students and is taught by teacher {g[n]}')
+		print()
+	print(f'Wall time: {solver.WallTime()/1000}')
 
-obj.SetMinimization()
-solver.Solve()
-print(obj.Value())
-solu = [[[[Time_Table[n][i][j][m].solution_value() for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
-for n in range(N):
-	for i in range(5):
-		for j in range(12):
-			for m in range(M):
-				if solu[n][i][j][m]:
-					print(f'\tClass {n + 1} has lesson in shift {j + 1} of day {i + 1} at room {m + 1} having {c[m]} slots, has {s[n]} students and is taught by teacher {g[n]}')
-
+if __name__ == '__main__':
+	MIP('data_15.txt')
