@@ -119,4 +119,7 @@ def MIP(filename):
 	print(f'Wall time: {solver.WallTime()/1000}')
 
 if __name__ == '__main__':
-	MIP('data_15.txt')
+	from huy_gen import *
+	file_name = "test.txt"
+	gen(file_name, 15, 4)
+	MIP(file_name)
