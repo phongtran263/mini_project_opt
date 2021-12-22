@@ -16,13 +16,15 @@
 • Notations:
 	• G[i]: set of class taught ny teacher i
 • Variables:
-	• S[n][i][j][m] = 1 if class n ∈ {1, 2, ..., N} has lesson in shift j ∈ {1, 2, ..., 12} of day i ∈ {1, 2, ..., 5} at room m ∈ {1, 2, ..., M} else 0
+	• Time_Table[n][i][j][m] = 1 if class n ∈ {1, 2, ..., N} has lesson in shift j ∈ {1, 2, ..., 12} of day i ∈ {1, 2, ..., 5} at room m ∈ {1, 2, ..., M} else 0
 	• Most_Shifts_Day[n] = day with the most shifts of class n
 	• Least_Shifts_Day[n] = day with the least shifts of class n
 • Constraints:
-	• Sum[S[k][i][j][m] | k ∈ G(p)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
-	• If c(m) < s(n) --> S[n][i][j][m] = 0  
-	• Sum[S[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
+	• Sum[Time_Table[k][i][j][m] | k ∈ G(p)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
+	• If c(m) < s(n) --> Time_Table[n][i][j][m] = 0  
+	• Sum[Time_Table[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
+	• Most_Shifts_Day[n] >= Time_Table[n][i][j][k]
+	• Least_Shifts_Day[n] <= Time_Table[n][i][j][k]
 • Objective Function: sum(Most_Shifts_Day) - sum(Least_Shifts_Day) --> Minimize
 '''
 
