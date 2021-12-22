@@ -175,6 +175,9 @@ def RandomRestart(flag,limit = 10):
             state,iterations = FirstChoiceHillClimbing()
         else:
             state,iterations = HillClimbing()
+        for i in range(num_time_slots):
+            for j in range(M):
+                candidates[i,j] = True
         num_iterations += iterations
         cnt += 1
     if GoalTest(state):
