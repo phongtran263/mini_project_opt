@@ -44,6 +44,8 @@ def gen(filename,N,M):
       info_class[choose][2] = num_in_room[room_smallest] - rd.randint(1,5)
       info_class[choose][0] += 1
 
+    no_lesson = [_ for _ in range(N) if info_class[_][0] == 0]
+
     for i in range(60):
       teacher_c = [_ for _ in range(1, 1 + number_teacher)]
       room_c = [_ for _ in range(M)]
@@ -74,10 +76,15 @@ def gen(filename,N,M):
             break
         if not loop:
           break
-        class_teach = rd.choice(teacher_class[teacher_satisfy])
+        choice1 = list(set.intersection(set(teacher_class[teacher_satisfy]), set(no_lesson)))
+        if len(choice1) == 0:
+          class_teach = rd.choice(teacher_class[teacher_satisfy])
+        else:
+          class_teach = rd.choice(choice1)
+          no_lesson.remove(class_teach)
         info_class[class_teach][0] += 1
         if num_in_room[room_satisfy] < info_class[class_teach][2]:
-          info_class[class_teach][2] = num_in_room[room_satisfy] - rd.randint(1,10)
+          info_class[class_teach][2] = num_in_room[room_satisfy] - rd.randint(1,5)
 
     
     for t, g, s in info_class:
