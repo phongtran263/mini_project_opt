@@ -15,11 +15,11 @@
 • Notations:
 	• G[i]: set of class taught ny teacher i
 • Variables:
-	• S[n][i][j][m] = 1 if class n ∈ {1, 2, ..., N} has lesson in shift j ∈ {1, 2, ..., 12} of day i ∈ {1, 2, ..., 5} at room m ∈ {1, 2, ..., M} else 0
+	• Time_Table[n][i][j][m] = 1 if class n ∈ {1, 2, ..., N} has lesson in shift j ∈ {1, 2, ..., 12} of day i ∈ {1, 2, ..., 5} at room m ∈ {1, 2, ..., M} else 0
 • Constraints:
-	• Sum[S[k][i][j][m] | k ∈ G(p)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
-	• If S[n][i][j][m] = 1 --> c(m) >= s(n)
-	• Sum[S[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
+	• Sum[Time_Table[k][i][j][m] | k ∈ G(p)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
+	• If Time_Table[n][i][j][m] = 1 --> c(m) >= s(n)
+	• Sum[Time_Table[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
 '''
 
 from ortools.sat.python import cp_model
@@ -74,7 +74,7 @@ def CP(f):
 
 	# Create a model and set variables
 	model = cp_model.CpModel()
-	Time_Table = [[[[model.NewIntVar(0, 1, f'S[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
+	Time_Table = [[[[model.NewIntVar(0, 1, f'Time_Table[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
 
 	# Constraints
 	for p in G:
