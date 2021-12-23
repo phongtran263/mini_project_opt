@@ -20,7 +20,7 @@
 	• Most_Shifts_Day[n] = day with the most shifts of class n
 	• Least_Shifts_Day[n] = day with the least shifts of class n
 • Constraints:
-	• Sum[Time_Table[k][i][j][m] | k ∈ G(p)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
+	• Sum[Time_Table[k][i][j][m] | k ∈ G(p), m in range(M)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
 	• If c(m) < s(n) --> Time_Table[n][i][j][m] = 0  
 	• Sum[Time_Table[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
 	• Most_Shifts_Day[n] >= Time_Table[n][i][j][k]
