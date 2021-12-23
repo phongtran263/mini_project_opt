@@ -17,7 +17,7 @@
 • Variables:
 	• Time_Table[n][i][j][m] = 1 if class n ∈ {1, 2, ..., N} has lesson in shift j ∈ {1, 2, ..., 12} of day i ∈ {1, 2, ..., 5} at room m ∈ {1, 2, ..., M} else 0
 • Constraints:
-	• Sum[Time_Table[k][i][j][m] | k ∈ G(p)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
+	• Sum[Time_Table[k][i][j][m] | k ∈ G(p), m in range(M)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
 	• If Time_Table[n][i][j][m] = 1 --> c(m) >= s(n)
 	• Sum[Time_Table[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
 '''
