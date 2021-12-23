@@ -80,8 +80,7 @@ def CP(f):
 	for p in G:
 		for i in range(5):
 			for j in range(12):
-				for m in range(M):
-					model.AddLinearConstraint(sum(Time_Table[k][i][j][m] for k in G[p]), 0, 1)
+				model.AddLinearConstraint(sum(Time_Table[k][i][j][m] for k in G[p] for m in range(M)), 0, 1)
 
 	for n in range(N):
 		for i in range(5):
