@@ -1,5 +1,5 @@
 import random as rd
-def gen(filename,N,M):
+def gen(filename,N,M, hard = True):
   with open(filename,'w') as f:
   #T:num of teachers
     f.write(f'{N} {M}\n')
@@ -94,7 +94,12 @@ def gen(filename,N,M):
         info_class[class_teach][0] += 1
         if num_in_room[room_satisfy] < info_class[class_teach][2]:
           info_class[class_teach][2] = num_in_room[room_satisfy] - rd.randint(1,5)
-
+    if not hard:
+      list_info = [_[:] for _ in info_class]
+      list_info.sort(reverse=True, key=lambda x: x[0])
+      for i in range(len(list_info)//3 + 1):
+        list_info[i][0] = list_info[i][0] // 2 + 1
+      info_class = list_info
     for t, g, s in info_class:
       f.write(f'{t} {g} {s}\n')
     for _ in num_in_room:
