@@ -121,5 +121,5 @@ def MIP(filename):
 if __name__ == '__main__':
 	from huy_gen import *
 	file_name = "test.txt"
-	gen(file_name, 15, 2, hard=False)
+	gen(file_name, 15, 4, hard=False)
 	MIP(file_name)

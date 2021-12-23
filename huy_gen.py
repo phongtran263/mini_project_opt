@@ -95,11 +95,9 @@ def gen(filename,N,M, hard = True):
         if num_in_room[room_satisfy] < info_class[class_teach][2]:
           info_class[class_teach][2] = num_in_room[room_satisfy] - rd.randint(1,5)
     if not hard:
-      list_info = [_[:] for _ in info_class]
-      list_info.sort(reverse=True, key=lambda x: x[0])
-      for i in range(len(list_info)//3 + 1):
-        list_info[i][0] = list_info[i][0] // 2 + 1
-      info_class = list_info
+      for i in range(len(info_class)):
+        info_class[i][0] = info_class[i][0] // 4 + 1
+      
     for t, g, s in info_class:
       f.write(f'{t} {g} {s}\n')
     for _ in num_in_room:
