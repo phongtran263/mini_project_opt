@@ -8,7 +8,7 @@ def gen(filename,N,M):
     num_in_room = [] # The capacity of this room
     room_smallest = 0
     teacher_class = {}
-    info_class = [[0,0,10000] for _ in range(N)]
+    info_class = [[0,0,float("inf")] for _ in range(N)]
     state_room = [[True]*M for _ in range(60)]
     state_teacher = [[True]*(1+number_teacher) for _ in range(60)]
     for _ in range(M):
@@ -17,7 +17,11 @@ def gen(filename,N,M):
       #   room_largest = len(num_in_room) - 1
       if num_in_room[-1] < num_in_room[room_smallest]:
         room_smallest = len(num_in_room) - 1
-    
+
+    for _ in range(M):
+      if _ != room_smallest and num_in_room[room_smallest] == num_in_room[_]:
+        num_in_room[_] += 10
+
     dict_class_teacher = {}
     for _ in range(N):
       if len(teacher) != 0:
@@ -33,12 +37,13 @@ def gen(filename,N,M):
 
     ############## CHOOSE CLASS IN SMALL ROOM ##############
     class_small_room = rd.sample([i for i in range(N)], N//2)
-
+    small_room = []
 
     for _ in range(60):
       if rd.choice([True, False]):
         continue
       choose = rd.choice(class_small_room)
+      small_room.append(choose)
       state_room[_][room_smallest] = False
       state_teacher[_][dict_class_teacher[choose]] = False
       info_class[choose][2] = num_in_room[room_smallest] - rd.randint(1,5)
@@ -78,7 +83,11 @@ def gen(filename,N,M):
           break
         choice1 = list(set.intersection(set(teacher_class[teacher_satisfy]), set(no_lesson)))
         if len(choice1) == 0:
-          class_teach = rd.choice(teacher_class[teacher_satisfy])
+          choose_from = list(set(teacher_class[teacher_satisfy]) - set(small_room))
+          if len(choose_from) == 0:
+            class_teach = rd.choice(teacher_class[teacher_satisfy])
+          else:
+            class_teach = rd.choice(choose_from)
         else:
           class_teach = rd.choice(choice1)
           no_lesson.remove(class_teach)
@@ -86,7 +95,6 @@ def gen(filename,N,M):
         if num_in_room[room_satisfy] < info_class[class_teach][2]:
           info_class[class_teach][2] = num_in_room[room_satisfy] - rd.randint(1,5)
 
-    
     for t, g, s in info_class:
       f.write(f'{t} {g} {s}\n')
     for _ in num_in_room:
