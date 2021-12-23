@@ -63,8 +63,8 @@ def MIP(filename):
 	for p in G:
 		for i in range(5):
 			for j in range(12):
+				cstr = solver.Constraint(0, 1)
 				for m in range(M):
-					cstr = solver.Constraint(0, 1)
 					for n in G[p]:
 						cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
 
