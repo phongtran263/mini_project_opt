@@ -6,7 +6,7 @@ def gen(filename,N,M):
     number_teacher = rd.randint(2, N//4)
     teacher = [_ for _ in range(1, 1 + number_teacher)]
     num_in_room = [] # The capacity of this room
-    room_smallest = 0
+    room_largest = 0
     teacher_class = {}
     info_class = [[0,0,float("inf")] for _ in range(N)]
     state_room = [[True]*M for _ in range(60)]
@@ -15,12 +15,12 @@ def gen(filename,N,M):
       num_in_room.append(rd.randint(30,60))
       # if num_in_room[-1] > num_in_room[room_largest]:
       #   room_largest = len(num_in_room) - 1
-      if num_in_room[-1] < num_in_room[room_smallest]:
-        room_smallest = len(num_in_room) - 1
+      if num_in_room[-1] > num_in_room[room_largest]:
+        room_largest = len(num_in_room) - 1
 
     for _ in range(M):
-      if _ != room_smallest and num_in_room[room_smallest] == num_in_room[_]:
-        num_in_room[_] += 10
+      if _ != room_largest and num_in_room[room_largest] == num_in_room[_]:
+        num_in_room[_] -= 10
 
     dict_class_teacher = {}
     for _ in range(N):
@@ -36,17 +36,17 @@ def gen(filename,N,M):
       dict_class_teacher[_] = index_teacher
 
     ############## CHOOSE CLASS IN SMALL ROOM ##############
-    class_small_room = rd.sample([i for i in range(N)], N//2)
-    small_room = []
+    class_large_room = rd.sample([i for i in range(N)], N//3)
+    large_room = []
 
     for _ in range(60):
       if rd.choice([True, False]):
         continue
-      choose = rd.choice(class_small_room)
-      small_room.append(choose)
-      state_room[_][room_smallest] = False
+      choose = rd.choice(class_large_room)
+      large_room.append(choose)
+      state_room[_][room_largest] = False
       state_teacher[_][dict_class_teacher[choose]] = False
-      info_class[choose][2] = num_in_room[room_smallest] - rd.randint(1,5)
+      info_class[choose][2] = num_in_room[room_largest] - rd.randint(0,5)
       info_class[choose][0] += 1
 
     no_lesson = [_ for _ in range(N) if info_class[_][0] == 0]
@@ -83,7 +83,7 @@ def gen(filename,N,M):
           break
         choice1 = list(set.intersection(set(teacher_class[teacher_satisfy]), set(no_lesson)))
         if len(choice1) == 0:
-          choose_from = list(set(teacher_class[teacher_satisfy]) - set(small_room))
+          choose_from = list(set(teacher_class[teacher_satisfy]) - set(large_room))
           if len(choose_from) == 0:
             class_teach = rd.choice(teacher_class[teacher_satisfy])
           else:
