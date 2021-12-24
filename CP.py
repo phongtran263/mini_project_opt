@@ -68,40 +68,47 @@ def input(filename):
 def CP(f, limit):
 	# Notations and data
 	N, M, t, g, s, c = input(f)
+	model = cp_model.CpModel()
 	G0 = set(g)
 	G = {}
 	for i in G0:
 		G[i] = [j for j in range(N) if g[j] == i]
 
 	# Create a model and set variables
-	model = cp_model.CpModel()
-	Time_Table = [[[[model.NewIntVar(0, 1, f'Time_Table[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
+	Time_Table = [[[[model.NewIntVar(0, 1, \
+		f'Time_Table[{i}][{d}][{k}][{r}]') \
+			for r in range(M)] for k in range(12)] \
+				for d in range(5)] for i in range(N)]
 
 	# Constraints
 	## A teacher teach only one class at a moment
 	for p in G:
-		for i in range(5):
-			for j in range(12):
-				model.AddLinearConstraint(sum(Time_Table[k][i][j][m] for k in G[p] for m in range(M)), 0, 1)
+		for d in range(5):
+			for k in range(12):
+				model.AddLinearConstraint(\
+					sum(Time_Table[i][d][k][r] \
+						for i in G[p] for r in range(M)), 0, 1)
 
 	## If a class study in a room, then the number of students is less than the room's capacity
-	for n in range(N):
-		for m in range(M):
+	for i in range(N):
+		for r in range(M):
 			b = model.NewBoolVar('b')
-			model.Add(c[m] < s[n]).OnlyEnforceIf(b)
-			for i in range(5):
-				for j in range(12):
-					model.Add(Time_Table[n][i][j][m] == 0).OnlyEnforceIf(b)
+			model.Add(c[r] < s[i]).OnlyEnforceIf(b)
+			for d in range(5):
+				for k in range(12):
+					model.Add(Time_Table[i][d][k][r] == 0).OnlyEnforceIf(b)
 					
 	## Guarantee enough lessons for each class
-	for n in range(N):
-		model.Add(sum(Time_Table[n][i][j][m] for m in range(M) for j in range(12) for i in range(5)) == t[n])
+	for i in range(N):
+		model.Add(sum(Time_Table[i][d][k][r] for r in range(M)\
+			 for k in range(12) for d in range(5)) == t[i])
 
 	## At a moment, there is only one class in a room
-	for i in range(5):
-		for j in range(12):
-			for m in range(M):
-				model.AddLinearConstraint(sum(Time_Table[n][i][j][m] for n in range(N)), 0, 1)
+	for d in range(5):
+		for k in range(12):
+			for r in range(M):
+				model.AddLinearConstraint(sum(Time_Table[i][d][k][r]\
+					 for i in range(N)), 0, 1)
 	
 	# Solve
 	solver = cp_model.CpSolver()

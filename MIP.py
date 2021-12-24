@@ -50,76 +50,86 @@ def MIP(filename):
 	N, M, t, g, s, c = input(filename)
 	G0 = set(g)
 	G = {}
+	solver = pywraplp.Solver.CreateSolver('CBC')
+	inf = solver.infinity()
+
 	for i in G0:
 		G[i] = [j for j in range(N) if g[j] == i]
 
-	solver = pywraplp.Solver.CreateSolver('CBC')
-	inf = solver.infinity()
-	Time_Table = [[[[solver.IntVar(0, 1, f'Time_Table[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
-	Most_Shifts_Day = [solver.IntVar(0, t[n], f'Most_Shifts_Day[{n}]') for n in range(N)]
-	Least_Shifts_Day = [solver.IntVar(0, t[n], f'Least_Shifts_Day[{n}]') for n in range(N)]
+	Time_Table = [[[[solver.IntVar(0, 1, \
+		f'Time_Table[{i}][{d}][{k}][{r}]') \
+			for r in range(M)] for k in range(12)] \
+				for d in range(5)] for i in range(N)]
+
+	Most_Shifts_Day = [solver.IntVar(0, t[n], \
+		f'Most_Shifts_Day[{n}]') for n in range(N)]
+
+	Least_Shifts_Day = [solver.IntVar(0, t[n], \
+		f'Least_Shifts_Day[{n}]') for n in range(N)]
 
 	# Constraints
 	## A teacher teach only one class at a moment
 	for p in G:
-		for i in range(5):
-			for j in range(12):
+		for d in range(5):
+			for k in range(12):
 				cstr = solver.Constraint(0, 1)
-				for m in range(M):
-					for n in G[p]:
-						cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
+				for r in range(M):
+					for i in G[p]:
+						cstr.SetCoefficient(Time_Table[i][d][k][r], 1)
 
-	## If a class study in a room, then the number of students is less than the room's capacity
-	for n in range(N):
-		for m in range(M):
-			if s[n] > c[m]:
-				for i in range(5):
-					for j in range(12):
+	## If a class study in a room, then the number of 
+	## students is less than the room's capacity
+	for i in range(N):
+		for r in range(M):
+			if s[i] > c[r]:
+				for d in range(5):
+					for k in range(12):
 						cstr = solver.Constraint(0, 0)
-						cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
+						cstr.SetCoefficient(Time_Table[i][d][k][r], 1)
 					
 	## Guarantee enough lessons for each class
-	for n in range(N):
-		cstr = solver.Constraint(t[n], t[n])
-		for i in range(5):
-			for j in range(12):
-				for m in range(M):
-					cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
+	for i in range(N):
+		cstr = solver.Constraint(t[i], t[i])
+		for d in range(5):
+			for k in range(12):
+				for r in range(M):
+					cstr.SetCoefficient(Time_Table[i][d][k][r], 1)
 
 	## Set the number of shift in the day with most shifts for each class
-	for n in range(N):
-		for i in range(5):
+	for i in range(N):
+		for d in range(5):
 			cstr = solver.Constraint(0, inf)
-			cstr.SetCoefficient(Most_Shifts_Day[n], 1)
-			for j in range(12):
-				for m in range(M):
-					cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
+			cstr.SetCoefficient(Most_Shifts_Day[i], 1)
+			for k in range(12):
+				for r in range(M):
+					cstr.SetCoefficient(Time_Table[i][d][k][r], -1)
 
 	## Set the number of shift in the day with least shifts for each class
-	for n in range(N):
-		for i in range(5):
+	for i in range(N):
+		for d in range(5):
 			cstr = solver.Constraint(-inf, 0)
-			cstr.SetCoefficient(Least_Shifts_Day[n], 1)
-			for j in range(12):
-				for m in range(M):
-					cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
+			cstr.SetCoefficient(Least_Shifts_Day[i], 1)
+			for k in range(12):
+				for r in range(M):
+					cstr.SetCoefficient(Time_Table[i][d][k][r], -1)
 
 	## At a moment, there is only one class in a room
-	for i in range(5):
-		for j in range(12):
-			for m in range(M):
+	for d in range(5):
+		for k in range(12):
+			for r in range(M):
 				cstr = solver.Constraint(0, 1)
-				for n in range(N):
-					cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
+				for i in range(N):
+					cstr.SetCoefficient(Time_Table[i][d][k][r], 1)
 
 	# Objective function and solving
 	obj = solver.Objective()
-	for n in range(N):
-		obj.SetCoefficient(Most_Shifts_Day[n], 1)
-		obj.SetCoefficient(Least_Shifts_Day[n], -1)
+	for i in range(N):
+		obj.SetCoefficient(Most_Shifts_Day[i], 1)
+		obj.SetCoefficient(Least_Shifts_Day[i], -1)
 
 	obj.SetMinimization()
 	solver.Solve()
+	
 	result = [[[[Time_Table[n][i][j][m].solution_value() for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
 	for n in range(N):
 		for i in range(5):
