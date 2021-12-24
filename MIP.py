@@ -25,6 +25,7 @@
 	• Sum[Time_Table[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
 	• Most_Shifts_Day[n] >= Time_Table[n][i][j][k]
 	• Least_Shifts_Day[n] <= Time_Table[n][i][j][k]
+	• Sum[Time_Table[n][i][j][m] | n ∈ {1, 2, ..., N}] ∈ {0, 1}
 • Objective Function: sum(Most_Shifts_Day) - sum(Least_Shifts_Day) --> Minimize
 '''
 
@@ -60,6 +61,7 @@ def MIP(filename):
 	Least_Shifts_Day = [solver.IntVar(0, ubDevi, f'Least_Shifts_Day[{n}]') for n in range(N)]
 
 	# Constraints
+	## A teacher teach only one class at a moment
 	for p in G:
 		for i in range(5):
 			for j in range(12):
@@ -68,6 +70,7 @@ def MIP(filename):
 					for n in G[p]:
 						cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
 
+	## If a class study in a room, then the number of students is less than the room's capacity
 	for n in range(N):
 		for m in range(M):
 			if s[n] > c[m]:
@@ -76,6 +79,7 @@ def MIP(filename):
 						cstr = solver.Constraint(0, 0)
 						cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
 					
+	## Guarantee enough lessons for each class
 	for n in range(N):
 		cstr = solver.Constraint(t[n], t[n])
 		for i in range(5):
@@ -83,6 +87,7 @@ def MIP(filename):
 				for m in range(M):
 					cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
 
+	## Set the number of shift in the day with most shifts for each class
 	for n in range(N):
 		for i in range(5):
 			cstr = solver.Constraint(0, inf)
@@ -91,6 +96,7 @@ def MIP(filename):
 				for m in range(M):
 					cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
 
+	## Set the number of shift in the day with least shifts for each class
 	for n in range(N):
 		for i in range(5):
 			cstr = solver.Constraint(-inf, 0)
@@ -98,6 +104,14 @@ def MIP(filename):
 			for j in range(12):
 				for m in range(M):
 					cstr.SetCoefficient(Time_Table[n][i][j][m], -1)
+
+	## At a moment, there is only one class in a room
+	for i in range(5):
+		for j in range(12):
+			for m in range(M):
+				cstr = solver.Constraint(0, 1)
+				for n in range(N):
+					cstr.SetCoefficient(Time_Table[n][i][j][m], 1)
 
 	# Objective function and solving
 	obj = solver.Objective()
@@ -107,7 +121,6 @@ def MIP(filename):
 
 	obj.SetMinimization()
 	solver.Solve()
-	print(obj.Value())
 	solu = [[[[Time_Table[n][i][j][m].solution_value() for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
 	for n in range(N):
 		for i in range(5):
@@ -116,10 +129,11 @@ def MIP(filename):
 					if solu[n][i][j][m]:
 						print(f'\tClass {n + 1} has lesson in shift {j + 1} of day {i + 1} at room {m + 1} having {c[m]} slots, has {s[n]} students and is taught by teacher {g[n]}')
 		print()
+	print(obj.Value())
 	print(f'Wall time: {solver.WallTime()/1000}')
 
 if __name__ == '__main__':
 	from huy_gen import *
-	file_name = "random_data.txt"
-	gen(file_name, 15, 4, hard=False)
+	file_name = "data.txt"
+	gen(file_name, 15, 4, hard=True)
 	MIP(file_name)
