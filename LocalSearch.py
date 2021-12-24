@@ -121,7 +121,7 @@ def HillClimbing():
                     best_candidate = candidate
                     min_violations = violations
                 current[var] = temp
-        if min_violations >= curr_violations:
+        if min_violations > curr_violations:
             break
         curr_violations = min_violations
         temp = current[best_var]
@@ -152,7 +152,7 @@ def FirstChoiceHillClimbing(limit = 10000):
             temp = current[var]
             current[var] = candidate
             violations = Value(current)
-            if violations < curr_violations:
+            if violations <= curr_violations:
                 candidates[candidate] = False
                 candidates[temp] = True
                 curr_violations = violations
