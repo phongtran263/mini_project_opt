@@ -104,4 +104,4 @@ def CP(f):
 	print(f'Wall time: {solver.WallTime()}')
 
 if __name__ == '__main__':
-	CP('data_15.txt')
+	CP('data.txt')

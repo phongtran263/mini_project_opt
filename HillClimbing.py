@@ -2,7 +2,7 @@ import random
 import time
 import math
 import sys
-from mini_project_instance_generator import gen
+from huy_gen import gen
 def Time(i):
     if 1<= i <= 12:
         day = 'Monday'
