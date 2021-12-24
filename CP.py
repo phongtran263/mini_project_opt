@@ -109,8 +109,8 @@ def CP(f, limit):
 
 	solution_printer = VarArraySolutionPrinter(Time_Table, N, M,c, s, g, limit)
 	solver.SearchForAllSolutions(model, solution_printer)
-	solver.Solve(model, solution_printer)
+	# solver.Solve(model, solution_printer)
 	print(f'Wall time: {solver.WallTime()}')
 
 if __name__ == '__main__':
-	CP('data.txt', 10)
+	CP('data.txt', 1)
