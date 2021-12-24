@@ -12,17 +12,15 @@ def gen(filename, N, M, hard = True):
     state_teacher = [[True for _ in range(number_teacher + 1)] for __ in range(60)]
     info_class = [[0,0,float("inf")] for _ in range(N)]
 
-    G = {}
+    # Initialize the teacher of each class
     CBG = {}
     teacher = [_ for _ in range(1, 1 + number_teacher)]
     for _ in range(N):
       if len(teacher) != 0: # To make sure that each teacher teach at least one class
         index_teacher = random.choice(teacher)
         teacher.remove(index_teacher)
-        G[index_teacher] = [_]
       else:
-        index_teacher = randint(1, len(G))
-        G[index_teacher].append(_)
+        index_teacher = randint(1, number_teacher)
       info_class[_][1] = index_teacher
       CBG[_] = index_teacher
 
@@ -39,6 +37,8 @@ def gen(filename, N, M, hard = True):
         info_class[c][2] = room_capacity[r] - randint(0,10)
         info_class[c][0] += 1
 
+    # Create the number of period in each class which is feasible to solve. 
+    # The number of period in one class do not too different with another one. 
     cases = {}
     for c in range(N):
       cases[c] = [(p,r) for p in range(60) for r in range(M)]
@@ -59,6 +59,8 @@ def gen(filename, N, M, hard = True):
         info_class[c][0] += 1
         period_each_class[c] += 1
 
+    # If set the mode hard = False, this mean the number of period  
+    # we have randomize above is 4 times to solution it write to file txt.
     if not hard:
       for i in range(len(info_class)):
         info_class[i][0] = info_class[i][0] // 4 + 1
