@@ -46,7 +46,7 @@ class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
 					for m in range(self.__M):
 						if self.Value(self.__vars[n][i][j][m]):
 							print(f'\tClass {n} has lesson in shift {j} of day {i} at room {m} having {self.__c[m]} slots, has {self.__s[n]} students and is taught by teacher {self.__g[n]}')
-		if self.__solution_count == self.__limit:
+		if self.__solution_count >= self.__limit:
 			self.StopSearch()
 	def solution_count(self):
 		return self.__solution_count
@@ -86,13 +86,13 @@ def CP(f, limit):
 
 	## If a class study in a room, then the number of students is less than the room's capacity
 	for n in range(N):
-		for i in range(5):
-			for j in range(12):
-				for m in range(M):
-					b = model.NewBoolVar('b')
-					model.Add(Time_Table[n][i][j][m] == 1).OnlyEnforceIf(b)
-					model.Add(Time_Table[n][i][j][m] == 0).OnlyEnforceIf(b.Not())
-					model.Add(c[m] >= s[n]).OnlyEnforceIf(b)
+		for m in range(M):
+			b = model.NewBoolVar('b')
+			model.Add(c[m] < s[n]).OnlyEnforceIf(b)
+			for i in range(5):
+				for j in range(12):
+					model.Add(Time_Table[n][i][j][m] == 0).OnlyEnforceIf(b)
+					
 	## Guarantee enough lessons for each class
 	for n in range(N):
 		model.Add(sum(Time_Table[n][i][j][m] for m in range(M) for j in range(12) for i in range(5)) == t[n])
@@ -113,4 +113,6 @@ def CP(f, limit):
 	print(f'Wall time: {solver.WallTime()}')
 
 if __name__ == '__main__':
-	CP('data.txt', 1)
+	from huy_gen import*
+	gen('random_data.txt', 30, 5)
+	CP('random_data.txt', 20)
