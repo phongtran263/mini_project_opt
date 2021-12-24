@@ -23,9 +23,9 @@
 	• Sum[Time_Table[k][i][j][m] | k ∈ G(p), m in range(M)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
 	• If c(m) < s(n) --> Time_Table[n][i][j][m] = 0  
 	• Sum[Time_Table[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
-	• Most_Shifts_Day[n] >= Time_Table[n][i][j][k]
-	• Least_Shifts_Day[n] <= Time_Table[n][i][j][k]
-	• Sum[Time_Table[n][i][j][m] | n ∈ {1, 2, ..., N}] ∈ {0, 1}
+	• Most_Shifts_Day[n] >= Time_Table[n][i][j][k] (sum of j from 1 to 12 and m from 1 to M)
+	• Least_Shifts_Day[n] <= Time_Table[n][i][j][k] (sum of j from 1 to 12 and m from 1 to M)
+	• Sum[Time_Table[n][i][j][m] | n ∈ {1, 2, ..., N}] ∈ {0, 1} (Constraint about room in specific time)
 • Objective Function: sum(Most_Shifts_Day) - sum(Least_Shifts_Day) --> Minimize
 '''
 
@@ -52,13 +52,12 @@ def MIP(filename):
 	G = {}
 	for i in G0:
 		G[i] = [j for j in range(N) if g[j] == i]
-	ubDevi = max(t)
 
 	solver = pywraplp.Solver.CreateSolver('CBC')
 	inf = solver.infinity()
 	Time_Table = [[[[solver.IntVar(0, 1, f'Time_Table[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
-	Most_Shifts_Day = [solver.IntVar(0, ubDevi, f'Most_Shifts_Day[{n}]') for n in range(N)]
-	Least_Shifts_Day = [solver.IntVar(0, ubDevi, f'Least_Shifts_Day[{n}]') for n in range(N)]
+	Most_Shifts_Day = [solver.IntVar(0, t[n], f'Most_Shifts_Day[{n}]') for n in range(N)]
+	Least_Shifts_Day = [solver.IntVar(0, t[n], f'Least_Shifts_Day[{n}]') for n in range(N)]
 
 	# Constraints
 	## A teacher teach only one class at a moment
@@ -121,12 +120,12 @@ def MIP(filename):
 
 	obj.SetMinimization()
 	solver.Solve()
-	solu = [[[[Time_Table[n][i][j][m].solution_value() for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
+	result = [[[[Time_Table[n][i][j][m].solution_value() for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
 	for n in range(N):
 		for i in range(5):
 			for j in range(12):
 				for m in range(M):
-					if solu[n][i][j][m]:
+					if result[n][i][j][m]:
 						print(f'\tClass {n + 1} has lesson in shift {j + 1} of day {i + 1} at room {m + 1} having {c[m]} slots, has {s[n]} students and is taught by teacher {g[n]}')
 		print()
 	print(obj.Value())
