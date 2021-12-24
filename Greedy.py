@@ -105,7 +105,9 @@ def Greedy():
     return solution
 
 if __name__ == '__main__':
-    N,M,t,g,s,c = Input('data_15.txt')
+    filename = "random_data.txt"
+    gen(filename, 15, 4, hard=False)
+    N,M,t,g,s,c = Input(filename)
     num_time_slots = 5*12
     candidates =  {}
     for i in range(num_time_slots):

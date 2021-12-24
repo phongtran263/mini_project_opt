@@ -75,7 +75,9 @@ def input(filename):
     return N,M,t,g,s,c
 
 if __name__ == '__main__':
-    N,M,t,g,s,c = input('data.txt')
+    filename = "random_data.txt"
+    gen(filename, 15, 4, hard=False)
+    N,M,t,g,s,c = input(filename)
     num_time_slots = 5*12
     
     model = cp_model.CpModel()
