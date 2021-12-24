@@ -1,6 +1,6 @@
-from mini_project_instance_generator import gen
+from huy_gen import gen
 import time
-def input(filename):
+def Input(filename):
     with open(filename) as f:
         N,M = [int(i) for i in f.readline().split()]
         class_info = []
@@ -15,6 +15,8 @@ def input(filename):
         g.append(i[1])
         s.append(i[2])
     return N,M,t,g,s,c
+
+
 def Time(i):
     if 1<= i <= 12:
         day = 'Monday'
@@ -37,8 +39,12 @@ def Time(i):
         else:
             lesson = j - 6
     return lesson,daytime,day
+
 def PrintSolution(solution):
-    for k in range(N):
+    if solution == 'Failure':
+        print(solution)
+        return
+    for k in range(len(N)):
         for i in range(t[k]):
             Class = k + 1
             time,room = solution[k,i]
@@ -48,22 +54,18 @@ def PrintSolution(solution):
                   + ' '*(3 - len(str(room)))+ f'at the {time[0]}' + f' lesson in the {time[1]}' 
                   + ' ' * (9 - len(str(time[1]))) + f' on {time[2]}')
         print()    
-gen('data_15.txt',20,3)
-N,M,t,g,s,c = input('data_project_15.txt')
-# sort the room set in terms of capacity
-M = [(c[i],i) for i in range(M)]
-M.sort()
-M = [i[1] for i in M]
-num_time_slots = 5*12
-def Select(candidate,solution,var):
+
+def Select(solution,var):
     for i in range(num_time_slots):
         for j in M:
-            if candidate[i][j]:
+            if candidates[i,j]:
                 new_solution = solution.copy()
                 new_solution[var] = (i,j)
                 if Feasible(new_solution):
                     return (i,j)
     return False
+
+
 def Feasible(solution):
     d1 = {}
     d2 = {}
@@ -87,26 +89,46 @@ def Feasible(solution):
         d3 = {}
         for j in i:
             d3[g[j]] = d3.get(g[j],-1) + 1
-        if sum(d3.values()) > 0:
-            return False
+            if d3[g[j]] > 0:
+                return False
     return True             
-def Solve():
-    candidate = [[True for j in range(len(M))] for i in range(num_time_slots)]
+
+def Greedy():
     solution = {}
-    for i in range(N):
+    for i in N:
         for j in range(t[i]):
-            x = Select(candidate,solution,(i,j))
-            if x == False:
-                return 'Not Found'
-            solution[i,j] = x
-            candidate[x[0]][x[1]] = False
+            candidate = Select(solution,(i,j))
+            if candidate == False:
+                return 'Failure'
+            solution[i,j] = candidate
+            candidates[candidate] = False
     return solution
-start = time.time()
-solution = Solve()
-end = time.time()
-print('Time:',end - start)
-PrintSolution(solution)
+
+if __name__ == '__main__':
+    N,M,t,g,s,c = Input('data_15.txt')
+    num_time_slots = 5*12
+    candidates =  {}
+    for i in range(num_time_slots):
+        for j in range(M):
+            candidates[i,j] = True
+    # sort the room set in increasing order with respect to its capacity
+    '''M = [(c[i],i) for i in range(M)]
+    M.sort()
+    M = [i[1] for i in M]
+    # sort the class set in decreasing order with respect to its number of students
+    N = [(s[i],i) for i in range(N)]
+    N.sort(reverse = True)
+    N = [i[1] for i in N]'''
+    M = range(M)
+    N = range(N)
+    start = time.time()
+    solution = Greedy()
+    end = time.time()
+    PrintSolution(solution)
+    print('Time:',end - start)
+
             
+                
     
     
     
