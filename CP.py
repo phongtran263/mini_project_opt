@@ -20,6 +20,7 @@
 	• Sum[Time_Table[k][i][j][m] | k ∈ G(p), m in range(M)] ∈ {0, 1} as p ∈ {1, 2, ..., numG}
 	• If Time_Table[n][i][j][m] = 1 --> c(m) >= s(n)
 	• Sum[Time_Table[n][i][j][m] | i ∈ {1, 2, ..., 5}, j ∈ {1, 2, ..., 12}, m ∈ {1, 2, ..., M}] == t(n)
+	• Sum[Time_Table[n][i][j][m] | n ∈ {1, 2, ..., N}] ∈ {0, 1}
 '''
 
 from ortools.sat.python import cp_model
@@ -64,7 +65,7 @@ def input(filename):
 		c = [int(x) for x in f.readline().split()]
 		return N, M, t, g, s, c
 
-def CP(f):
+def CP(f, limit):
 	# Notations and data
 	N, M, t, g, s, c = input(f)
 	G0 = set(g)
@@ -77,11 +78,13 @@ def CP(f):
 	Time_Table = [[[[model.NewIntVar(0, 1, f'Time_Table[{n}][{i}][{j}][{m}]') for m in range(M)] for j in range(12)] for i in range(5)] for n in range(N)]
 
 	# Constraints
+	## A teacher teach only one class at a moment
 	for p in G:
 		for i in range(5):
 			for j in range(12):
 				model.AddLinearConstraint(sum(Time_Table[k][i][j][m] for k in G[p] for m in range(M)), 0, 1)
 
+	## If a class study in a room, then the number of students is less than the room's capacity
 	for n in range(N):
 		for i in range(5):
 			for j in range(12):
@@ -90,18 +93,24 @@ def CP(f):
 					model.Add(Time_Table[n][i][j][m] == 1).OnlyEnforceIf(b)
 					model.Add(Time_Table[n][i][j][m] == 0).OnlyEnforceIf(b.Not())
 					model.Add(c[m] >= s[n]).OnlyEnforceIf(b)
-
+	## Guarantee enough lessons for each class
 	for n in range(N):
 		model.Add(sum(Time_Table[n][i][j][m] for m in range(M) for j in range(12) for i in range(5)) == t[n])
 
+	## At a moment, there is only one class in a room
+	for i in range(5):
+		for j in range(12):
+			for m in range(M):
+				model.AddLinearConstraint(sum(Time_Table[n][i][j][m] for n in range(N)), 0, 1)
+	
 	# Solve
 	solver = cp_model.CpSolver()
 	solver.parameters.search_branching == cp_model.FIXED_SEARCH
 
-	solution_printer = VarArraySolutionPrinter(Time_Table, N, M,c, s, g, 50)
+	solution_printer = VarArraySolutionPrinter(Time_Table, N, M,c, s, g, limit)
 	solver.SearchForAllSolutions(model, solution_printer)
 	solver.Solve(model, solution_printer)
 	print(f'Wall time: {solver.WallTime()}')
 
 if __name__ == '__main__':
-	CP('data.txt')
+	CP('data.txt', 10)
