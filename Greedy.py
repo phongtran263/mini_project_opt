@@ -112,8 +112,6 @@ if __name__ == '__main__':
     N = [(s[i],i) for i in range(N)]
     N.sort(reverse = True)
     N = [i[1] for i in N]
-    '''M = range(M)
-    N = range(N)'''
     start = time.time()
     solution = Greedy()
     end = time.time()
