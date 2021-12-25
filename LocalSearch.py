@@ -1,8 +1,8 @@
 import random as rd
 import time
-from random_generate import gen
+from mini_project_instance_generator import Gen
 
-def input(filename):
+def Input(filename):
 	t = []
 	g = []
 	s = []
@@ -14,7 +14,7 @@ def input(filename):
 			g.append(l[1])
 			s.append(l[2])
 		c = [int(x) for x in f.readline().split()]
-	return N, M, t, g, s, c
+		return N, M, t, g, s, c
 
 def Time(i):
     if 1<= i <= 12:
@@ -28,16 +28,11 @@ def Time(i):
     else:
         day = 'Friday'
     j = i % 12
-    if 1 <= j <= 6:
-        daytime = 'Morning'
-        lesson = j
+    if j == 0:
+        lesson = 12
     else:
-        daytime = 'Afternoon'
-        if j == 0:
-            lesson = 6
-        else:
-            lesson = j - 6
-    return lesson,daytime,day
+        lesson = j
+    return lesson,day
 
 def PrintSolution(solution):
     for k in range(N):
@@ -47,8 +42,7 @@ def PrintSolution(solution):
             room += 1
             time = Time(time+1)
             print(f'Class {Class}' + ' '*(3 - len(str(Class))) + f'has a lesson in room {room}'
-                  + ' '*(3 - len(str(room)))+ f'at the {time[0]}' + f' lesson in the {time[1]}' 
-                  + ' ' * (9 - len(str(time[1]))) + f' on {time[2]}')
+                  + ' '*(3 - len(str(room)))+ f'at the {time[0]}' + f' shift on {time[1]}' )
         print()    
 
 
@@ -65,7 +59,7 @@ def Initial():
     
     
 def Value(state):
-        #heuristics function
+        #heuristic function
         violations = 0
         d1 = {}
         d2 = {}
@@ -73,7 +67,7 @@ def Value(state):
             Class = i[0]
             time_slot = j[0]
             room = j[1]
-            # capacity of the room must be less than the number of students in a class
+            # capacity of the room must be less than the number of students of a class
             if c[room] < s[Class]:
                 violations += 1
             # at a given time, a class can't take part in more than 1 lecture
@@ -133,7 +127,7 @@ def HillClimbing():
     return current,iterations
 
 
-def FirstChoiceHillClimbing(limit = 10000):
+def FirstChoiceHillClimbing(limit = 20000):
     current = Initial()
     vars = list(current.keys())
     for candidate in current.values():
@@ -166,7 +160,7 @@ def FirstChoiceHillClimbing(limit = 10000):
     return current,iterations
 
 
-def RandomRestart(flag,limit = 10):
+def RandomRestart(flag,limit = 100):
     state = Initial()
     cnt = 0
     num_iterations = 0
@@ -189,14 +183,12 @@ def RandomRestart(flag,limit = 10):
 
 
 if __name__ == '__main__':
-    filename = "random_data.txt"
-    gen(filename, 15, 2, hard=False)
-    N,M,t,g,s,c = input(filename)
+    N,M,t,g,s,c = Input('test.txt')
     num_time_slots = 5 * 12
     candidates =  {}
     for i in range(num_time_slots):
-        for j in range(M):
-            candidates[i,j] = True
+            for j in range(M):
+                candidates[i,j] = True
     start = time.time()
     solution,status,num_trials,num_iterations = RandomRestart(True)
     end = time.time()
@@ -206,6 +198,5 @@ if __name__ == '__main__':
     print('Number of iterations:',num_iterations)
     print('Number of trials:',num_trials)
         
-                
             
             
