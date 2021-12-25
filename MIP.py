@@ -139,5 +139,5 @@ def MIP(filename):
 if __name__ == '__main__':
 	from random_generate import *
 	file_name = "random_data.txt"
-	gen(file_name, 15, 4, hard=False)
+	gen(file_name, 15, 2, hard=False)
 	MIP(file_name)
