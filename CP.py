@@ -27,7 +27,7 @@ from ortools.sat.python import cp_model
 
 class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
 	#print intermediate solution
-	def __init__(self,vars, N, M, c, s, g, limit):
+	def __init__(self,vars, N, M, c, s, g, limit = 1):
 		cp_model.CpSolverSolutionCallback.__init__(self) 
 		self.__vars = vars 
 		self.__solution_count = 0
@@ -46,6 +46,10 @@ class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
 					for m in range(self.__M):
 						if self.Value(self.__vars[n][i][j][m]):
 							print(f'\tClass {n} has lesson in shift {j} of day {i} at room {m} having {self.__c[m]} slots, has {self.__s[n]} students and is taught by teacher {self.__g[n]}')
+		Most_Shifts_Day = [max(sum(self.Value(self.__vars[n][i][j][m]) for j in range(12) for m in range(self.__M)) for i in range(5)) for n in range(self.__N)]
+		Least_Shifts_Day = [min(sum(self.Value(self.__vars[n][i][j][m]) for j in range(12) for m in range(self.__M)) for i in range(5)) for n in range(self.__N)]
+		fstar = sum(Most_Shifts_Day[n] - Least_Shifts_Day[n] for n in range(self.__N))
+		print(f'f* = {fstar}')
 		if self.__solution_count >= self.__limit:
 			self.StopSearch()
 	def solution_count(self):
@@ -65,7 +69,7 @@ def input(filename):
 		c = [int(x) for x in f.readline().split()]
 	return N, M, t, g, s, c
 
-def CP(f, limit):
+def CP(f, limit = 1, optimal = False):
 	# Notations and data
 	N, M, t, g, s, c = input(f)
 	model = cp_model.CpModel()
@@ -107,18 +111,51 @@ def CP(f, limit):
 			for r in range(M):
 				model.AddLinearConstraint(sum(Time_Table[i][d][k][r]\
 					 for i in range(N)), 0, 1)
-	
-	# Solve
-	solver = cp_model.CpSolver()
-	solver.parameters.search_branching == cp_model.FIXED_SEARCH
 
-	solution_printer = VarArraySolutionPrinter(Time_Table, N, M,c, s, g, limit)
-	solver.SearchForAllSolutions(model, solution_printer)
-	# solver.Solve(model, solution_printer)
-	print(f'Wall time: {solver.WallTime()}')
+	# Solve
+	if optimal:
+		Total_Shifts = {}
+		for i in range(N):
+			for d in range(5):
+				Total_Shifts[i, d] = model.NewIntVar(0, t[i], f'Total_Shifts[{i}, {d}]')
+				model.Add(Total_Shifts[i, d] - sum(Time_Table[i][d][k][r] for k in range(12) for r in range(M)) == 0)
+
+		Most_Shifts_Day = {}
+		for i in range(N):
+			Most_Shifts_Day[i] = model.NewIntVar(0, t[i], f'Most_Shifts_Day[{i}]')
+			model.AddMaxEquality(Most_Shifts_Day[i], [Total_Shifts[i, d] for d in range(5)])
+
+		Least_Shifts_Day = {}
+		for i in range(N):
+			Least_Shifts_Day[i] = model.NewIntVar(0, t[i], f'Least_Shifts_Day[{i}]')
+			model.AddMinEquality(Least_Shifts_Day[i], [Total_Shifts[i, d] for d in range(5)])
+		
+		model.Minimize(sum(Most_Shifts_Day[i] - Least_Shifts_Day[i] for i in range(N)))
+		solver = cp_model.CpSolver()
+		solver.parameters.search_branching == cp_model.FIXED_SEARCH
+
+		solver.Solve(model)
+		result = [[[[solver.Value(Time_Table[i][d][k][r]) for r in range(M)] for k in range(12)] for d in range(5)] for i in range(N)]
+		for n in range(N):
+			for i in range(5):
+				for j in range(12):
+					for m in range(M):
+						if result[n][i][j][m]:
+							print(f'\tClass {n + 1} has lesson in shift {j + 1} of day {i + 1} at room {m + 1} having {c[m]} slots, has {s[n]} students and is taught by teacher {g[n]}')
+			print()		
+		print(f'f* = {solver.ObjectiveValue()}')
+		print(f'Wall time: {solver.WallTime()}')
+	
+	else:
+		solver = cp_model.CpSolver()
+		solver.parameters.search_branching == cp_model.FIXED_SEARCH
+
+		solution_printer = VarArraySolutionPrinter(Time_Table, N, M,c, s, g, limit)
+		solver.SearchForAllSolutions(model, solution_printer)
+		print(f'Wall time: {solver.WallTime()}')
 
 if __name__ == '__main__':
 	from random_generate import *
 	filename = "random_data.txt"
 	gen(filename, 15, 2)
-	CP(filename, 1)
+	CP(filename, optimal= True)
