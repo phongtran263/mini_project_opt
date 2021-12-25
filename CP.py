@@ -75,10 +75,8 @@ def CP(f, limit):
 		G[i] = [j for j in range(N) if g[j] == i]
 
 	# Create a model and set variables
-	Time_Table = [[[[model.NewIntVar(0, 1, \
-		f'Time_Table[{i}][{d}][{k}][{r}]') \
-			for r in range(M)] for k in range(12)] \
-				for d in range(5)] for i in range(N)]
+	Time_Table = [[[[model.NewIntVar(0, 1, f'Time_Table[{i}][{d}][{k}][{r}]') \
+			for r in range(M)] for k in range(12)] for d in range(5)] for i in range(N)]
 
 	# Constraints
 	## A teacher teach only one class at a moment
@@ -120,6 +118,6 @@ def CP(f, limit):
 	print(f'Wall time: {solver.WallTime()}')
 
 if __name__ == '__main__':
-	from huy_gen import*
+	from random_generate import *
 	gen('random_data.txt', 30, 5)
-	CP('random_data.txt', 20)
+	CP('random_data.txt', 1)

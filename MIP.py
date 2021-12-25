@@ -56,16 +56,9 @@ def MIP(filename):
 	for i in G0:
 		G[i] = [j for j in range(N) if g[j] == i]
 
-	Time_Table = [[[[solver.IntVar(0, 1, \
-		f'Time_Table[{i}][{d}][{k}][{r}]') \
-			for r in range(M)] for k in range(12)] \
-				for d in range(5)] for i in range(N)]
+	Time_Table = [[[[solver.IntVar(0, 1, f'Time_Table[{i}][{d}][{k}][{r}]') \
+			for r in range(M)] for k in range(12)] for d in range(5)] for i in range(N)]
 
-	Most_Shifts_Day = [solver.IntVar(0, t[n], \
-		f'Most_Shifts_Day[{n}]') for n in range(N)]
-
-	Least_Shifts_Day = [solver.IntVar(0, t[n], \
-		f'Least_Shifts_Day[{n}]') for n in range(N)]
 
 	# Constraints
 	## A teacher teach only one class at a moment
@@ -94,21 +87,25 @@ def MIP(filename):
 			for k in range(12):
 				for r in range(M):
 					cstr.SetCoefficient(Time_Table[i][d][k][r], 1)
+  
+	Most_Shifts_Day, Least_Shifts_Day = [], []
 
-	## Set the number of shift in the day with most shifts for each class
 	for i in range(N):
+		new_var = solver.IntVar(0, t[i], f'Most_Shifts_Day[{i}]')
+		Most_Shifts_Day.append(new_var)
 		for d in range(5):
 			cstr = solver.Constraint(0, inf)
-			cstr.SetCoefficient(Most_Shifts_Day[i], 1)
+			cstr.SetCoefficient(new_var, 1)
 			for k in range(12):
 				for r in range(M):
 					cstr.SetCoefficient(Time_Table[i][d][k][r], -1)
 
-	## Set the number of shift in the day with least shifts for each class
 	for i in range(N):
+		new_var = solver.IntVar(0, t[i], f'Least_Shifts_Day[{i}]')
+		Least_Shifts_Day.append(new_var)
 		for d in range(5):
 			cstr = solver.Constraint(-inf, 0)
-			cstr.SetCoefficient(Least_Shifts_Day[i], 1)
+			cstr.SetCoefficient(new_var, 1)
 			for k in range(12):
 				for r in range(M):
 					cstr.SetCoefficient(Time_Table[i][d][k][r], -1)
@@ -142,7 +139,7 @@ def MIP(filename):
 	print(f'Wall time: {solver.WallTime()/1000}')
 
 if __name__ == '__main__':
-	from huy_gen import *
+	from random_generate import *
 	file_name = "random_data.txt"
-	gen(file_name, 15, 4, hard=True)
+	gen(file_name, 15, 4, hard=False)
 	MIP(file_name)

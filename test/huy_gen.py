@@ -13,22 +13,14 @@ def gen(filename,N,M, hard = True):
     state_teacher = [[True]*(1+number_teacher) for _ in range(60)]
     for _ in range(M):
       num_in_room.append(rd.randint(30,60))
-      # if num_in_room[-1] > num_in_room[room_largest]:
-      #   room_largest = len(num_in_room) - 1
       if num_in_room[-1] > num_in_room[room_largest]:
         room_largest = len(num_in_room) - 1
-
-    for _ in range(M):
-      if _ != room_largest and num_in_room[room_largest] == num_in_room[_]:
-        num_in_room[_] -= 10
 
     dict_class_teacher = {}
     for _ in range(N):
       if len(teacher) != 0:
         index_teacher = teacher.pop()
         teacher_class[index_teacher] = [_]
-        # info_class[_][1] = index_teacher
-        # dict_class_teacher[_] = index_teacher
       else:
         index_teacher = rd.randint(1, len(teacher_class))
         teacher_class[index_teacher].append(_)

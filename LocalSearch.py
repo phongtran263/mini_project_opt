@@ -1,6 +1,6 @@
 import random as rd
 import time
-from huy_gen import gen
+from random_generate import gen
 
 def Input(filename):
     with open(filename) as f:

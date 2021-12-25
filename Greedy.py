@@ -1,4 +1,4 @@
-from huy_gen import gen
+from random_generate import gen
 import time
 def Input(filename):
     with open(filename) as f:
