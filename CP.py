@@ -63,7 +63,7 @@ def input(filename):
 			g.append(l[1])
 			s.append(l[2])
 		c = [int(x) for x in f.readline().split()]
-		return N, M, t, g, s, c
+	return N, M, t, g, s, c
 
 def CP(f, limit):
 	# Notations and data

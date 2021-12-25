@@ -2,22 +2,19 @@ import random as rd
 import time
 from random_generate import gen
 
-def Input(filename):
-    with open(filename) as f:
-        N,M = [int(i) for i in f.readline().split()]
-        class_info = []
-        for i in range(N):
-            class_info.append([int(i) for i in f.readline().split()])
-        c = [int(i) for i in f.readline().split()]
-    t = []
-    g = []
-    s = []
-    for i in class_info:
-        t.append(i[0])
-        g.append(i[1])
-        s.append(i[2])
-    return N,M,t,g,s,c
-
+def input(filename):
+	t = []
+	g = []
+	s = []
+	with open(filename) as f:
+		[N, M] = [int(x) for x in f.readline().split()]
+		for _ in range(N):
+			l = [int(x) for x in f.readline().split()]
+			t.append(l[0])
+			g.append(l[1])
+			s.append(l[2])
+		c = [int(x) for x in f.readline().split()]
+	return N, M, t, g, s, c
 
 def Time(i):
     if 1<= i <= 12:
@@ -194,7 +191,7 @@ def RandomRestart(flag,limit = 10):
 if __name__ == '__main__':
     filename = "random_data.txt"
     gen(filename, 15, 2, hard=False)
-    N,M,t,g,s,c = Input(filename)
+    N,M,t,g,s,c = input(filename)
     num_time_slots = 5 * 12
     candidates =  {}
     for i in range(num_time_slots):
