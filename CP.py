@@ -119,5 +119,6 @@ def CP(f, limit):
 
 if __name__ == '__main__':
 	from random_generate import *
-	gen('random_data.txt', 30, 5)
-	CP('random_data.txt', 1)
+	filename = "random_data.txt"
+	gen(filename, 15, 2)
+	CP(filename, 1)
