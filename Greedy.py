@@ -1,7 +1,8 @@
-from mini_project_instance_generator import Gen
+from random_generate import gen
 import time
 import random as rd
-def Input(filename):
+
+def input(filename):
 	t = []
 	g = []
 	s = []
@@ -13,7 +14,7 @@ def Input(filename):
 			g.append(l[1])
 			s.append(l[2])
 		c = [int(x) for x in f.readline().split()]
-		return N, M, t, g, s, c
+	return N, M, t, g, s, c
 
 def Time(i):
     if 1<= i <= 12:
@@ -98,7 +99,9 @@ def Greedy():
     return solution
 
 if __name__ == '__main__':
-    N,M,t,g,s,c = Input('test.txt')
+    filename = "random_data.txt"
+    gen(filename, 15, 2, hard=False)
+    N,M,t,g,s,c = input(filename)
     num_time_slots = 5*12
     candidates =  {}
     for i in range(num_time_slots):
