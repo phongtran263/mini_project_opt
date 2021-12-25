@@ -88,24 +88,22 @@ def MIP(filename):
 				for r in range(M):
 					cstr.SetCoefficient(Time_Table[i][d][k][r], 1)
   
-	Most_Shifts_Day, Least_Shifts_Day = [], []
-
+	Most_Shifts_Day = {}
 	for i in range(N):
-		new_var = solver.IntVar(0, t[i], f'Most_Shifts_Day[{i}]')
-		Most_Shifts_Day.append(new_var)
+		Most_Shifts_Day[i] = solver.IntVar(0, t[i], f'Most_Shifts_Day[{i}]')
 		for d in range(5):
 			cstr = solver.Constraint(0, inf)
-			cstr.SetCoefficient(new_var, 1)
+			cstr.SetCoefficient(Most_Shifts_Day[i], 1)
 			for k in range(12):
 				for r in range(M):
 					cstr.SetCoefficient(Time_Table[i][d][k][r], -1)
 
+	Least_Shifts_Day = {}
 	for i in range(N):
-		new_var = solver.IntVar(0, t[i], f'Least_Shifts_Day[{i}]')
-		Least_Shifts_Day.append(new_var)
+		Least_Shifts_Day[i] = solver.IntVar(0, t[i], f'Least_Shifts_Day[{i}]')
 		for d in range(5):
 			cstr = solver.Constraint(-inf, 0)
-			cstr.SetCoefficient(new_var, 1)
+			cstr.SetCoefficient(Least_Shifts_Day[i], 1)
 			for k in range(12):
 				for r in range(M):
 					cstr.SetCoefficient(Time_Table[i][d][k][r], -1)

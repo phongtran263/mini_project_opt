@@ -10,7 +10,7 @@ def gen(filename, N, M, hard = True):
     room_capacity = [randint(30,60) for _ in range(M)]
     state_room = [[True for _ in range(M)] for __ in range(60)]
     state_teacher = [[True for _ in range(number_teacher + 1)] for __ in range(60)]
-    info_class = [[0,0,float("inf")] for _ in range(N)]
+    info_class = [[0,-1,1e10] for _ in range(N)]
 
     # Initialize the teacher of each class
     CBG = {}
@@ -72,3 +72,4 @@ def gen(filename, N, M, hard = True):
 
 if __name__ == "__main__":
   gen("test.txt", 15, 2)
+  print(1e10)
