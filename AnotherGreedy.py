@@ -28,30 +28,27 @@ def Solve(filename):
   state_room = [[True for _ in range(M)] for __ in range(60)]
   Greedy(info_classes, state_room, state_teacher, c)
 
-def Greedy(info_classes, state_room, state_teacher, rooms, timetable = {}):
-  if len(info_classes) == 0:
-    PrintSolution(timetable)
-    return True
-  Class = len(info_classes)
-  info_class = info_classes.pop()
-  timetable[Class] = []
-  for _ in range(info_class[0]):
-    found = False
-    for p in range(60):
-      for r in range(len(rooms)):
-        if Feasible(info_class, state_room, state_teacher, rooms, p, r):
-          state_room[p][r] = False
-          state_teacher[p][info_class[1]] = False
-          timetable[Class].append((p, r))
-          found = True
+def Greedy(info_classes, state_room, state_teacher, rooms):
+  timetable = {}
+  for i in range(len(info_classes)):
+    info_class = info_classes[i]
+    timetable[i] = []
+    for _ in range(info_class[0]):
+      found = False
+      for p in range(60):
+        for r in range(len(rooms)):
+          if Feasible(info_class, state_room, state_teacher, rooms, p, r):
+            state_room[p][r] = False
+            state_teacher[p][info_class[1]] = False
+            timetable[i].append((p, r))
+            found = True
+            break
+        if found:
           break
-      if found:
-        break
-    if not found:
-      print("FAILURE")
-      return False
-  if not Greedy(info_classes, state_room, state_teacher, rooms, timetable):
-    return False
+      if not found:
+        print("FAILURE")
+        return False
+  PrintSolution(timetable)
   return True
 
 def Feasible(info_class, state_room, state_teacher, rooms, p, r):
@@ -69,10 +66,10 @@ def Feasible(info_class, state_room, state_teacher, rooms, p, r):
 def PrintSolution(timetable):
   classes = sorted(list(timetable.keys()))
   convert = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
-  p = lambda x: 12 if x == 12 else x%12
+  p = lambda x: 12 if x % 12 == 0 else x % 12
   for i in classes:
     for j, k in timetable[i]:
-      print(f'Class {i} has lessons at period {p(j+1)} on {convert[j//12]} at room {k}')
+      print(f'Class {i+1} has lessons at period {p(j+1)} on {convert[j//12]} at room {k}')
     print()
 
 if __name__ == "__main__":
