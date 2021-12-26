@@ -4,7 +4,7 @@ import time
 def input(filename):
   with open(filename) as f:
     [N, M] = [int(x) for x in f.readline().split()]
-    info_classes = [[int(x) for x in f.readline().split()] + [_ + 1] for _ in range(N)]
+    info_classes = [[int(x) for x in f.readline().split()] + [i] for i in range(N)]
     rooms = [int(x) for x in f.readline().split()]
   return info_classes, rooms
 
@@ -12,7 +12,7 @@ def Greedy(filename):
   info_classes, rooms = input(filename)
   # Sort depend on room's capacity (increasing) 
   rooms_sort = sorted([(rooms[i], i) for i in range(len(rooms))], key = lambda x : x[0])
-  
+
   # Sort depend on the number of student (decreasing)
   info_classes_sort = sorted(info_classes, key = lambda x: -x[2])
   teacher = [g for t, g, s, _ in info_classes]
@@ -22,7 +22,7 @@ def Greedy(filename):
   for i in range(len(info_classes_sort)):
     info_class = info_classes_sort[i]
     timetable[info_class[-1]] = []
-    for _ in range(info_class[0]):
+    for _ in range(info_class[0]): # If we loop this way, we will sure that each class has enough shift.
       x = Select(info_class, state_room, state_teacher, rooms_sort)
       if x == None:
         return "FAILURE"
@@ -61,7 +61,7 @@ def PrintSolution(timetable):
   shift = lambda x: 12 if x % 12 == 0 else x % 12
   for i in classes:
     for p, r in timetable[i]:
-      print(f'Class {i} has lessons at period {shift(p+1)} on {convert[p//12]} at room {r}')
+      print(f'Class {i + 1} has lessons at period {shift(p+1)} on {convert[p//12]} at room {r + 1}')
     print()
 
 if __name__ == "__main__":
