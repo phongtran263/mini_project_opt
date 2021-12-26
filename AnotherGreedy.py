@@ -20,11 +20,9 @@ def Greedy(filename):
     for _ in range(info_class[0]):
       x = Select(info_class, state_room, state_teacher, rooms)
       if x == None:
-        print("FAILURE")
-        return False
+        return "FAILURE"
       timetable[i].append(x)
-  PrintSolution(timetable)
-  return True
+  return timetable
 
 def Feasible(info_class, state_room, state_teacher, rooms, p, r):
   # At a moment, a teacher teaches at most one class
@@ -48,18 +46,22 @@ def Select(info_class, state_room, state_teacher, rooms):
   return None
 
 def PrintSolution(timetable):
+  if timetable == "FAILURE":
+    print("FAILURE")
+    return
   classes = sorted(list(timetable.keys()))
-  convert = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
-  p = lambda x: 12 if x % 12 == 0 else x % 12
+  convert = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  shift = lambda x: 12 if x % 12 == 0 else x % 12
   for i in classes:
-    for j, k in timetable[i]:
-      print(f'Class {i+1} has lessons at period {p(j+1)} on {convert[j//12]} at room {k}')
+    for p, r in timetable[i]:
+      print(f'Class {i+1} has lessons at period {shift(p+1)} on {convert[p//12]} at room {r}')
     print()
 
 if __name__ == "__main__":
   filename = "random_data.txt"
   gen(filename, 15, 2, hard=True)
   start = time.time()
-  Greedy(filename)
+  timetable = Greedy(filename)
   end = time.time()
+  PrintSolution(timetable)
   print("Time:", end - start)
