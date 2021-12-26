@@ -19,8 +19,7 @@ def Greedy(filename):
   state_teacher = [[True for _ in range(len(set(teacher)) + 1)] for __ in range(60)]
   state_room = [[True for _ in range(len(rooms))] for __ in range(60)]
   timetable = {}
-  for i in range(len(info_classes_sort)):
-    info_class = info_classes_sort[i]
+  for info_class in info_classes_sort:
     timetable[info_class[-1]] = []
     for _ in range(info_class[0]): # If we loop this way, we will sure that each class has enough shift.
       x = Select(info_class, state_room, state_teacher, rooms_sort)
@@ -29,8 +28,16 @@ def Greedy(filename):
       timetable[info_class[-1]].append(x)
   return timetable
 
-def Feasible(info_class, state_room, state_teacher, info_room, p):
-  capacity, index_room = info_room
+def Select(info_class, state_room, state_teacher, rooms):
+  for p in range(60):
+    for capacity, index_room in rooms:
+      if Feasible(info_class, state_room, state_teacher, capacity, p, index_room):
+        state_room[p][index_room] = False
+        state_teacher[p][info_class[1]] = False
+        return p, index_room
+  return None
+
+def Feasible(info_class, state_room, state_teacher, capacity, p, index_room):
   # At a moment, a teacher teaches at most one class
   if not state_teacher[p][info_class[1]]:
     return False
@@ -41,16 +48,6 @@ def Feasible(info_class, state_room, state_teacher, info_room, p):
   if info_class[2] > capacity:
     return False
   return True
-
-def Select(info_class, state_room, state_teacher, rooms):
-  for p in range(60):
-    for r in range(len(rooms)):
-      if Feasible(info_class, state_room, state_teacher, rooms[r], p):
-        _, index_room = rooms[r]
-        state_room[p][index_room] = False
-        state_teacher[p][info_class[1]] = False
-        return p, index_room
-  return None
 
 def PrintSolution(timetable):
   if timetable == "FAILURE":
