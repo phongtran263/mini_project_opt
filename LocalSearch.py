@@ -1,6 +1,6 @@
 import random as rd
 import time
-from random_generate import gen
+from data_generator import gen
 
 def input(filename):
 	t = []
@@ -62,7 +62,6 @@ def Value(state):
         #heuristic function
         violations = 0
         d1 = {}
-        d2 = {}
         for i,j in state.items():
             Class = i[0]
             time_slot = j[0]
@@ -70,18 +69,15 @@ def Value(state):
             # capacity of the room must be less than the number of students of a class
             if c[room] < s[Class]:
                 violations += 1
-            # at a given time, a class can't take part in more than 1 lecture
-            d1[Class,time_slot] = d1.get((Class,time_slot),-1) + 1
-            # two class having the same teacher can't study at the same time 
-            d2[time_slot] = d2.get(time_slot,set())
-            d2[time_slot].add(Class)
-        violations += sum(d1.values())
+            # at a given time, a teacher can't teach at more than 1 room
+            d1[time_slot] = d1.get(time_slot,[])
+            d1[time_slot].append(Class)
        
-        for i in d2.values():
-            d3 = {}
+        for i in d1.values():
+            d2 = {}
             for j in i:
-                d3[g[j]] = d3.get(g[j],-1) + 1
-            violations += sum(d3.values())
+                d2[g[j]] = d2.get(g[j],-1) + 1
+            violations += sum(d2.values())
         return violations
 
 
@@ -161,6 +157,8 @@ def FirstChoiceHillClimbing(limit = 20000):
 
 
 def RandomRestart(flag,limit = 100):
+    # flag == True, FirstChoiceHillClimbing
+    # flag == False, HillClimbing
     state = Initial()
     cnt = 0
     num_iterations = 0
@@ -183,7 +181,7 @@ def RandomRestart(flag,limit = 100):
 
 
 if __name__ == '__main__':
-    filename = "random_data.txt"
+    filename = "data.txt"
     gen(filename, 15, 2, hard=False)
     N,M,t,g,s,c = input(filename)
     num_time_slots = 5 * 12
@@ -200,5 +198,4 @@ if __name__ == '__main__':
     print('Number of iterations:',num_iterations)
     print('Number of trials:',num_trials)
         
-            
             
