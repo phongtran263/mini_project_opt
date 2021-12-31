@@ -124,11 +124,18 @@ class Greedy(object):
         classes = sorted(list(timetable.keys()))
         convert = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         shift = lambda x: 12 if x % 12 == 0 else x % 12
+        count = [[0]*5 for _ in range(len(classes))]
         for i in classes:
             table_sort = sorted(timetable[i])
             for p, r in table_sort:
+                count[i][p//12] += 1
                 print(f'Class {i + 1} has lessons at period {shift(p+1)} on {convert[p//12]} at room {r + 1}')
             print()
+        
+        f = 0
+        for i in count:
+            f += (max(i) - min(i))
+        print("F* =", f)
 
 if __name__ == "__main__":
     filename = "random_data.txt"
