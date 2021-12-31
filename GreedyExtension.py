@@ -1,4 +1,3 @@
-from Greedy import Select
 from random_generate import gen
 import time
 
